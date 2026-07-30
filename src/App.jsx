@@ -17,12 +17,14 @@ import Toast from './components/Toast';
 import Drawer from './components/Drawer';
 import ConfigPanel from './components/ConfigPanel';
 import DocTypeSelector from './components/DocTypeSelector';
+import HelpButton from './components/HelpButton';
 
 import SupportView from './views/SupportView';
 import AboutView from './views/AboutView';
 import PremiumView from './views/PremiumView';
 import TermsView from './views/TermsView';
 import PrivacyView from './views/PrivacyView';
+import GuideView from './views/GuideView';
 
 import './App.css';
 
@@ -49,6 +51,7 @@ export default function App() {
   const [images, setImages] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [orientationWarn, setOrientationWarn] = useState('');
+  const [helpVisible, setHelpVisible] = useState(true);
 
   const [ocrText, setOcrText] = useState('');
   const [fields, setFields] = useState(() => emptyFieldsForType(docType));
@@ -215,6 +218,13 @@ export default function App() {
       />
       <ConfigPanel open={configOpen} onClose={() => setConfigOpen(false)} />
       <Toast message={toastMessage} />
+      {view !== 'guide' && (
+        <HelpButton
+          visible={helpVisible}
+          onOpen={() => setView('guide')}
+          onDismiss={() => setHelpVisible(false)}
+        />
+      )}
     </>
   );
 
@@ -225,6 +235,7 @@ export default function App() {
   if (view === 'premium') return shell(<>{header}<PremiumView onBack={() => setView('main')} /></>);
   if (view === 'terms') return shell(<>{header}<TermsView onBack={() => setView('about')} /></>);
   if (view === 'privacy') return shell(<>{header}<PrivacyView onBack={() => setView('about')} /></>);
+  if (view === 'guide') return shell(<>{header}<GuideView onBack={() => setView('main')} /></>);
 
   return shell(
     <div className="app">

@@ -1312,6 +1312,207 @@
   line-height: 1.6;
 }
 
+/* ── Guide view ── */
+
+.guide-intro {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ink-soft);
+  max-width: 700px;
+  margin: 0 auto 28px;
+  text-align: center;
+}
+
+.guide-step {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 20px 22px;
+  margin-bottom: 18px;
+}
+
+.guide-step__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.guide-step__num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: #fff;
+  background: var(--navy);
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.guide-step__head h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--navy);
+  margin: 0;
+}
+
+:root[data-theme="dark"] .guide-step__head h3 { color: #7aabda; }
+
+.guide-step__desc {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--ink);
+  margin: 0 0 14px;
+}
+
+.guide-visual {
+  background: rgba(20, 57, 95, 0.04);
+  border: 1px dashed var(--rule);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+:root[data-theme="dark"] .guide-visual { background: rgba(122, 171, 218, 0.05); }
+
+.guide-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.guide-visual--split {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.guide-text-demo {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.guide-highlight {
+  background: #f0dca0;
+  color: var(--ink);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+:root[data-theme="dark"] .guide-highlight { background: #a9812f; color: #fff; }
+
+.guide-arrow {
+  flex: none;
+  font-size: 18px;
+  color: var(--brass);
+}
+
+.guide-field-demo {
+  flex: 1;
+}
+
+.guide-field-demo__value {
+  background: var(--card);
+  border: 1.5px solid var(--brass);
+  border-radius: 6px;
+  padding: 7px 9px;
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.guide-table-demo {
+  margin-bottom: 8px;
+}
+
+.guide-table-demo .excel-table {
+  min-width: 0;
+  width: auto;
+}
+
+.guide-caption {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .guide-visual--split {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .guide-arrow {
+    transform: rotate(90deg);
+    align-self: center;
+  }
+}
+
+/* ── Floating help button ── */
+
+.help-fab {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: 46px;
+  height: 46px;
+  z-index: 150;
+}
+
+.help-fab__btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: none;
+  background: var(--navy);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(13, 40, 66, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, background 0.15s;
+}
+
+.help-fab__btn:hover {
+  background: var(--navy-deep);
+  transform: scale(1.05);
+}
+
+.help-fab__close {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1.3px solid var(--paper);
+  background: var(--ink-soft);
+  color: #fff;
+  font-size: 8px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.help-fab__close:hover { background: var(--danger); }
+
 /* ── About view ── */
 
 .about-logo-section {
