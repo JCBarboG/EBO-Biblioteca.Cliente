@@ -5,23 +5,24 @@ import { VitePWA } from 'vite-plugin-pwa'
 // https://vite.dev/config/
 export default defineConfig({
   // GitHub Pages ("Deploy from a branch") sirve el sitio bajo
-  // https://jcbarbog.github.io/App-OCR/, no en la raíz del dominio. Este base
-  // path debe coincidir EXACTO (mayúsculas incluidas) con el nombre del repo.
-  base: '/EBO/',
+  // https://jcbarbog.github.io/EBO-Biblioteca.Cliente/, no en la raíz del
+  // dominio. Este base path debe coincidir EXACTO (mayúsculas incluidas)
+  // con el nombre del repo: JCBarboG/EBO-Biblioteca.Cliente.
+  base: '/EBO-Biblioteca.Cliente/',
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
         lang: 'es',
-        name: 'EBO — Extracción Bibliográfica y Organizacional',
-        short_name: 'EBO',
+        name: 'EBO Biblioteca — Cliente',
+        short_name: 'EBO Cliente',
         description: 'Extrae y organiza datos bibliográficos de portadas de libros directamente en tu navegador.',
         display: 'standalone',
         theme_color: '#0d2842',
         background_color: '#0d2842',
-        start_url: '/EBO/',
-        scope: '/EBO/',
+        start_url: '/EBO-Biblioteca.Cliente/',
+        scope: '/EBO-Biblioteca.Cliente/',
         orientation: 'portrait',
         icons: [
           { src: 'icons/ebo-48.png',  sizes: '48x48',   type: 'image/png' },

@@ -1,9 +1,9 @@
 {
-  "name": "ebo",
+  "name": "ebo-biblioteca-cliente",
   "private": true,
   "version": "3.0.0",
   "type": "module",
-  "homepage": "https://jcbarbog.github.io/EBO/",
+  "homepage": "https://jcbarbog.github.io/EBO-Biblioteca.Cliente/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
