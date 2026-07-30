@@ -8,6 +8,14 @@ export default function CategoryFields({ fields, onFieldChange, selection, onAss
   const cats = CATEGORIES_BY_TYPE[docType] || CATEGORIES_BY_TYPE.libro;
   const hasSelection = Boolean(selection.text && selection.text.trim());
 
+  const handleEmptyInputMouseDown = (e, key) => {
+    if (fields[key]) return; // ya tiene contenido: comportamiento normal de edición
+    if (!hasSelection) return; // nada seleccionado: comportamiento normal (foco)
+    e.preventDefault();
+    onAssign(key);
+    e.currentTarget.focus();
+  };
+
   return (
     <div className="category-fields">
       <div className="selection-bar">
@@ -21,34 +29,36 @@ export default function CategoryFields({ fields, onFieldChange, selection, onAss
             t.step02.hint
           )}
         </p>
-        <div className="selection-bar__chips">
-          {cats.map((cat) => (
-            <button
-              key={cat.key}
-              type="button"
-              className={`chip${activeKey === cat.key ? ' chip--active' : ''}`}
-              disabled={!hasSelection}
-              onClick={() => onAssign(cat.key)}
-            >
-              {cat.label[lang] || cat.label.es}
-            </button>
-          ))}
-        </div>
       </div>
 
-      <div className="category-grid">
-        {cats.map((cat) => (
-          <div className="category-grid__item" key={cat.key}>
-            <label htmlFor={`field-${cat.key}`}>{cat.fieldLabel[lang] || cat.fieldLabel.es}</label>
-            <input
-              id={`field-${cat.key}`}
-              type="text"
-              value={fields[cat.key] || ''}
-              onChange={(e) => onFieldChange(cat.key, e.target.value)}
-              placeholder={`${cat.fieldLabel[lang] || cat.fieldLabel.es}…`}
-            />
-          </div>
-        ))}
+      <div className="fields-scroll">
+        <div className="category-grid">
+          {cats.map((cat) => (
+            <div
+              className={`category-grid__item${activeKey === cat.key ? ' category-grid__item--active' : ''}`}
+              key={cat.key}
+            >
+              <div
+                className="category-grid__head"
+                role="button"
+                tabIndex={0}
+                onClick={() => onAssign(cat.key)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onAssign(cat.key); } }}
+              >
+                <label htmlFor={`field-${cat.key}`}>{cat.fieldLabel[lang] || cat.fieldLabel.es}</label>
+                {cat.marcTag && <span className="category-grid__tag">{cat.marcTag}</span>}
+              </div>
+              <input
+                id={`field-${cat.key}`}
+                type="text"
+                value={fields[cat.key] || ''}
+                onChange={(e) => onFieldChange(cat.key, e.target.value)}
+                onMouseDown={(e) => handleEmptyInputMouseDown(e, cat.key)}
+                placeholder={`${cat.fieldLabel[lang] || cat.fieldLabel.es}…`}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

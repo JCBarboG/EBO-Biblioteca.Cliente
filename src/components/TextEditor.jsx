@@ -1,7 +1,8 @@
+import { forwardRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { useT } from '../i18n/translations';
 
-export default function TextEditor({ value, onChange, onSelectionChange }) {
+const TextEditor = forwardRef(function TextEditor({ value, onChange, onSelectionChange }, ref) {
   const { lang } = useApp();
   const t = useT(lang);
 
@@ -20,6 +21,7 @@ export default function TextEditor({ value, onChange, onSelectionChange }) {
         {t.step02.recognized}
       </label>
       <textarea
+        ref={ref}
         id="raw-text"
         className="text-editor__area"
         value={value}
@@ -33,4 +35,6 @@ export default function TextEditor({ value, onChange, onSelectionChange }) {
       />
     </div>
   );
-}
+});
+
+export default TextEditor;

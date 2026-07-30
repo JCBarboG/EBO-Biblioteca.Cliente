@@ -7,7 +7,9 @@ export default function DocTypeSelector({ onTypeChange }) {
 
   const types = [
     { key: 'libro', label: t.docTypes.libro },
+    { key: 'articulosLibro', label: t.docTypes.articulosLibro },
     { key: 'revista', label: t.docTypes.revista },
+    { key: 'articuloRevista', label: t.docTypes.articuloRevista },
     { key: 'tesis', label: t.docTypes.tesis },
   ];
 

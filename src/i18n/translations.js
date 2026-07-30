@@ -22,7 +22,7 @@ export const translations = {
       version: 'Versión',
       env: 'Entorno',
     },
-    docTypes: { libro: '📚 Libro', revista: '📰 Revista', tesis: '🎓 Tesis' },
+    docTypes: { libro: '📚 Libro', revista: '📰 Revista', tesis: '🎓 Tesis', articulosLibro: '📄 Artículos de libro', articuloRevista: '📑 Artículo de revista' },
     step01: {
       title: 'Imágenes del documento',
       hint: 'Captura máximo 3 imágenes. Usa las flechas para navegar. La orientación vertical es requerida para extraer.',
@@ -140,7 +140,7 @@ export const translations = {
       version: 'Version',
       env: 'Environment',
     },
-    docTypes: { libro: '📚 Book', revista: '📰 Journal', tesis: '🎓 Thesis' },
+    docTypes: { libro: '📚 Book', revista: '📰 Journal', tesis: '🎓 Thesis', articulosLibro: '📄 Book chapters', articuloRevista: '📑 Journal article' },
     step01: {
       title: 'Document images',
       hint: 'Capture up to 3 images. Use the arrows to navigate. Portrait orientation is required to extract.',

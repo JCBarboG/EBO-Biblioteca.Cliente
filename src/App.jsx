@@ -55,9 +55,11 @@ export default function App() {
   const [records, setRecords] = useState([]);
   const [selection, setSelection] = useState({ start: 0, end: 0, text: '' });
   const [activeChip, setActiveChip] = useState(null);
+  const [columnPunctuation, setColumnPunctuation] = useState({});
 
   const chipTimerRef = useRef(null);
   const imagesRef = useRef([]);
+  const textareaRef = useRef(null);
 
   const { recognize, progress, statusLabel, isProcessing, error: ocrError } = useOcrWorker();
   const { toastMessage, showToast } = useToast();
@@ -70,6 +72,9 @@ export default function App() {
 
   useEffect(() => {
     setFields(emptyFieldsForType(docType));
+    // Las columnas cambian de significado entre tipos de documento, así que
+    // la puntuación asignada manualmente no debe arrastrarse de un tipo a otro.
+    setColumnPunctuation({});
   }, [docType]);
 
   const handleNewRecord = () => {
@@ -152,6 +157,16 @@ export default function App() {
     setActiveChip(key);
     if (chipTimerRef.current) clearTimeout(chipTimerRef.current);
     chipTimerRef.current = setTimeout(() => setActiveChip(null), 400);
+
+    // Limpiar la selección tras asignar: evita que un clic posterior en otra
+    // casilla vacía pegue el mismo fragmento por accidente (ver
+    // project_ebo_cliente_ui_decisions.md).
+    setSelection({ start: 0, end: 0, text: '' });
+    const ta = textareaRef.current;
+    if (ta) {
+      const pos = ta.selectionEnd;
+      ta.setSelectionRange(pos, pos);
+    }
   };
 
   const handleSave = () => {
@@ -165,7 +180,11 @@ export default function App() {
   const handleExport = () => {
     if (records.length === 0) { showToast(t.step03.noRecords); return; }
     showToast(t.step03.exporting(records.length));
-    exportBooksToExcel(records, docType, lang);
+    exportBooksToExcel(records, docType, lang, columnPunctuation);
+  };
+
+  const handlePunctuationChange = (key, value) => {
+    setColumnPunctuation((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleClearRecords = () => {
@@ -243,7 +262,7 @@ export default function App() {
           </div>
           <div className="divider" />
           <div className="step-grid">
-            <TextEditor value={ocrText} onChange={setOcrText} onSelectionChange={setSelection} />
+            <TextEditor ref={textareaRef} value={ocrText} onChange={setOcrText} onSelectionChange={setSelection} />
             <CategoryFields
               fields={fields}
               onFieldChange={(key, val) => setFields((prev) => ({ ...prev, [key]: val }))}
@@ -267,7 +286,13 @@ export default function App() {
               <TrashGlyph />
             </button>
           </div>
-          <BooksTable books={records} onSave={handleSave} onExport={handleExport} />
+          <BooksTable
+            books={records}
+            onSave={handleSave}
+            onExport={handleExport}
+            columnPunctuation={columnPunctuation}
+            onPunctuationChange={handlePunctuationChange}
+          />
         </section>
       </main>
     </div>
