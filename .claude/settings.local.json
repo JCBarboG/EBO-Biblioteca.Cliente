@@ -1,7 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm --version)"
+      "Bash(npm --version)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(gh pr *)",
+      "Bash(gh repo *)",
+      "Bash(gh run *)",
+      "Bash(npm run *)",
+      "Bash(node -e \"try{require\\('canvas'\\);console.log\\('canvas ok'\\)}catch\\(e\\){console.log\\('no canvas'\\)}\")",
+      "Bash(node -e \"try{require\\('@napi-rs/canvas'\\);console.log\\('napi-canvas ok'\\)}catch\\(e\\){console.log\\('no napi-canvas'\\)}\")",
+      "Bash(node -e \"try{require\\('jimp'\\);console.log\\('jimp ok'\\)}catch\\(e\\){console.log\\('no jimp'\\)}\")",
+      "Bash(npm install *)"
     ]
   }
 }
