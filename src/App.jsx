@@ -228,7 +228,7 @@ export default function App() {
     </>
   );
 
-  const header = <AppHeader onHamburger={() => setDrawerOpen(true)} />;
+  const header = <AppHeader onHamburger={() => setDrawerOpen(true)} onLogoClick={() => setView('main')} />;
 
   if (view === 'support') return shell(<>{header}<SupportView onBack={() => setView('main')} /></>);
   if (view === 'about') return shell(<>{header}<AboutView onBack={() => setView('main')} onNavigate={setView} /></>);
@@ -239,7 +239,7 @@ export default function App() {
 
   return shell(
     <div className="app">
-      <AppHeader onHamburger={() => setDrawerOpen(true)} />
+      {header}
       <DocTypeSelector onTypeChange={handleDocTypeChange} />
 
       <main className="app__main">
@@ -310,16 +310,21 @@ export default function App() {
   );
 }
 
-function AppHeader({ onHamburger }) {
+function AppHeader({ onHamburger, onLogoClick }) {
   const { lang } = useApp();
   const t = useT(lang);
   return (
     <header className="app__header">
       <div className="header-banner">
-        <div className="header-brand">
+        <button
+          type="button"
+          className="header-brand header-brand--link"
+          onClick={onLogoClick}
+          aria-label={t.header.goHome}
+        >
           <h1>EBO</h1>
           <p className="header-sub">{t.header.subtitle}</p>
-        </div>
+        </button>
         <button type="button" className="hamburger" onClick={onHamburger} aria-label="Abrir menú">
           <span /><span /><span />
         </button>

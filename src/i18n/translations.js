@@ -1,6 +1,6 @@
 export const translations = {
   es: {
-    header: { subtitle: 'Extracción Bibliográfica y Organizacional' },
+    header: { subtitle: 'Extracción Bibliográfica y Organizacional', goHome: 'Ir al menú principal' },
     menu: {
       title: 'EBO',
       subtitle: 'Extracción Bibliográfica y Organizacional',
@@ -153,7 +153,7 @@ export const translations = {
   },
 
   en: {
-    header: { subtitle: 'Bibliographic Extraction and Organization' },
+    header: { subtitle: 'Bibliographic Extraction and Organization', goHome: 'Go to main menu' },
     menu: {
       title: 'EBO',
       subtitle: 'Bibliographic Extraction and Organization',
