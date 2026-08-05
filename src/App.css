@@ -752,7 +752,7 @@
   text-align: left;
 }
 
-.punct-pop--left {
+.punct-pop--right {
   right: auto;
   left: -8px;
 }
@@ -770,7 +770,7 @@
   transform: rotate(45deg);
 }
 
-.punct-pop--left::before {
+.punct-pop--right::before {
   right: auto;
   left: 16px;
 }

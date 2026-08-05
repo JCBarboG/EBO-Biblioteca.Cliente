@@ -73,7 +73,11 @@ export default function BooksTable({ books, onSave, onExport, columnPunctuation,
               {cats.map((cat, idx) => {
                 const active = Boolean(columnPunctuation[cat.key]);
                 const colLabel = cat.colLabel[lang] || cat.colLabel.es;
-                const openLeft = idx >= cats.length - 2;
+                // Por defecto la burbuja se abre hacia la izquierda (se
+                // extiende sobre las columnas anteriores). Las primeras
+                // columnas no tienen columnas previas donde extenderse, así
+                // que para esas se invierte: se abre hacia la derecha.
+                const nearFirstColumn = idx <= 1;
                 return (
                   <th key={cat.key} className="field-names__cell">
                     <span className="field-names__label">
@@ -91,7 +95,7 @@ export default function BooksTable({ books, onSave, onExport, columnPunctuation,
                     />
                     {openMenuKey === cat.key && (
                       <div
-                        className={`punct-pop${openLeft ? ' punct-pop--left' : ''}`}
+                        className={`punct-pop${nearFirstColumn ? ' punct-pop--right' : ''}`}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <p className="punct-pop__title">
