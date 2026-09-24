@@ -644,14 +644,43 @@
   border: 1.5px solid #b0b0b0;
   border-radius: 8px;
   background: #fff;
-  margin-bottom: 20px;
-  /* Alto pensado para encabezado + ~6 filas (ver MIN_VISIBLE_ROWS en
-     BooksTable.jsx): mientras el usuario no supere esa cantidad de
-     registros, todo entra sin scroll. Al superarla, aparece scroll interno
-     acotado a esta caja (nunca la página completa), y el encabezado queda
-     fijo arriba gracias a position: sticky más abajo. */
-  max-height: 300px;
+  margin-bottom: 0;
+  /* El alto lo fija BooksTable.jsx (inline): 300 px por defecto, mínimo
+     240 px, máximo 90 % de la ventana, y la persona lo cambia arrastrando
+     el manejador inferior (.table-resize). El scroll queda acotado a esta
+     caja y el encabezado fijo arriba gracias a position: sticky. */
+  min-height: 240px;
 }
+
+/* Manejador para alargar la tabla hacia abajo */
+.table-resize {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 18px;
+  margin: 2px 0 14px;
+  cursor: ns-resize;
+  touch-action: none;
+  user-select: none;
+  border-radius: 6px;
+}
+
+.table-resize__grip {
+  width: 40px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--line);
+  transition: background 0.15s, width 0.15s;
+}
+
+.table-resize:hover .table-resize__grip,
+.table-resize:active .table-resize__grip,
+.table-resize:focus-visible .table-resize__grip {
+  background: var(--brass);
+  width: 56px;
+}
+
+.table-resize:focus-visible { outline: 2px solid var(--brass); outline-offset: 1px; }
 
 :root[data-theme="dark"] .excel-wrap {
   border-color: #2d3f54;
@@ -753,10 +782,11 @@
    (que obligaba a hacer scroll) por una grilla compacta de símbolos que
    siempre se ve completa de un vistazo — ver project_ebo_cliente_ui_decisions.md. */
 .punct-pop {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: -8px;
-  z-index: 6;
+  /* Se renderiza con un portal en <body> y position: fixed (ver
+     PunctPopover en BooksTable.jsx), así el contenedor con scroll de la
+     tabla ya no lo recorta. top/left se calculan desde el ícono. */
+  position: fixed;
+  z-index: 950;
   background: var(--card);
   border: 1px solid var(--rule);
   border-radius: 12px;
@@ -766,27 +796,47 @@
   text-align: left;
 }
 
-.punct-pop--right {
-  right: auto;
-  left: -8px;
+
+.punct-pop--below { animation: popIn 0.14s ease; }
+.punct-pop--above { animation: popIn 0.14s ease; }
+
+@keyframes popIn {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: none; }
 }
 
-.punct-pop::before {
-  content: '';
+.punct-reset {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 7px 8px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--navy);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.punct-reset:hover:not(:disabled) { border-color: var(--brass); border-style: solid; }
+.punct-reset:disabled { opacity: 0.4; }
+
+:root[data-theme="dark"] .punct-btn,
+:root[data-theme="dark"] .punct-reset { color: #cfe0f2; }
+:root[data-theme="dark"] .punct-btn--active { color: #fff; }
+
+/* Indicador de override manual en el encabezado de la columna */
+.col-override-dot {
   position: absolute;
-  top: -6px;
-  right: 16px;
-  width: 11px;
-  height: 11px;
-  background: var(--card);
-  border-left: 1px solid var(--rule);
-  border-top: 1px solid var(--rule);
-  transform: rotate(45deg);
-}
-
-.punct-pop--right::before {
-  right: auto;
-  left: 16px;
+  top: 5px;
+  right: 14px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brass);
+  box-shadow: 0 0 0 2px rgba(169, 129, 47, 0.18);
 }
 
 .punct-pop__title {
@@ -906,7 +956,9 @@
   color: #9ca3af;
 }
 
-.marc-sym { color: #a9812f; font-weight: 700; margin-left: 4px; }
+/* Sin margen extra: el espacio que lleve el símbolo (p. ej. " :") es parte
+   de la regla, así la vista previa se ve igual que la celda exportada. */
+.marc-sym { color: #a9812f; font-weight: 700; white-space: pre; }
 .excel-table .empty-cell { color: #bbb; font-size: 11px; }
 
 /* ── Toast ── */
@@ -1976,4 +2028,259 @@
   .header-banner h1 { font-size: 36px; }
   .premium-carousel { padding: 24px 44px; }
   .premium-features { grid-template-columns: 1fr; }
+}
+
+
+/* ── Botón Guardar en historial ── */
+
+.btn--history {
+  display: block;
+  width: 100%;
+  margin-top: 0;
+  background: transparent;
+  border-color: var(--brass);
+  border-style: dashed;
+  color: var(--brass);
+}
+
+.btn--history:hover:not(:disabled) {
+  background: rgba(169, 129, 47, 0.08);
+  border-style: solid;
+}
+
+.btn--sm { padding: 7px 12px; font-size: 13px; flex: none; }
+
+.btn--danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+.btn--danger:hover:not(:disabled) { opacity: 0.9; }
+
+.btn--danger-outline {
+  background: transparent;
+  border-color: rgba(140, 47, 47, 0.45);
+  color: var(--danger);
+}
+
+.btn--danger-outline:hover:not(:disabled) {
+  border-color: var(--danger);
+  background: rgba(140, 47, 47, 0.06);
+}
+
+:root[data-theme="dark"] .btn--danger-outline { color: #e59a9a; border-color: rgba(229, 154, 154, 0.45); }
+
+/* ── Ventana de confirmación ── */
+
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(13, 40, 66, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.dialog {
+  width: 100%;
+  max-width: 440px;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--brass);
+  border-radius: 12px;
+  box-shadow: 0 18px 48px rgba(13, 40, 66, 0.28);
+  padding: 22px 22px 18px;
+}
+
+.dialog__title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 0 0 6px;
+  line-height: 1.35;
+}
+
+:root[data-theme="dark"] .dialog__title { color: #e8e4d9; }
+
+.dialog__message {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0 0 14px;
+  line-height: 1.5;
+}
+
+.dialog__package {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--ink);
+  background: rgba(169, 129, 47, 0.1);
+  border-left: 3px solid var(--brass);
+  border-radius: 6px;
+  padding: 9px 12px;
+  margin: 0 0 16px;
+}
+
+.dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.dialog__actions .btn { flex: 0 1 auto; padding: 9px 14px; font-size: 13px; }
+
+@media (max-width: 480px) {
+  .dialog__actions { flex-direction: column-reverse; }
+  .dialog__actions .btn { width: 100%; }
+}
+
+/* ── Vista Historial ── */
+
+.history__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.history__count {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.history__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.history__filter {
+  border: 1px solid var(--rule);
+  background: var(--card);
+  color: var(--ink-soft);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.history__filter:hover { border-color: var(--brass); color: var(--ink); }
+
+.history__filter--active {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+
+.history__filter--active:hover { color: #fff; }
+
+.history__notice {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  margin: 0 0 18px;
+  line-height: 1.5;
+}
+
+.history__empty {
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 14px;
+  padding: 40px 16px;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+}
+
+.history__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+/* Tarjeta estilo ficha de catálogo: papel, perforación, renglón */
+.history-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px 16px 30px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-top: 2px solid rgba(169, 129, 47, 0.55);
+  border-radius: 6px;
+  box-shadow: 0 1px 0 var(--rule), 0 3px 10px rgba(35, 30, 15, 0.05);
+}
+
+.history-card::before {
+  /* perforación de la ficha */
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+.history-card__info { min-width: 0; display: grid; gap: 8px; }
+
+.history-card__date {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--navy);
+}
+
+:root[data-theme="dark"] .history-card__date { color: #cfe0f2; }
+
+.history-card__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+.history-card__type {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--brass);
+  border: 1px solid rgba(169, 129, 47, 0.5);
+  background: rgba(169, 129, 47, 0.08);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.history-card__rows { font-size: 13px; color: var(--ink-soft); }
+
+.history-card__actions { display: flex; gap: 8px; flex: none; }
+
+
+@media (max-width: 560px) {
+  .history-card { flex-direction: column; align-items: stretch; }
+  .history-card__actions .btn { flex: 1; }
+}
+
+/* Botón outline legible en modo oscuro (antes quedaba navy sobre navy) */
+:root[data-theme="dark"] .btn--outline {
+  color: #cfe0f2;
+  border-color: #3d6a96;
+}
+
+:root[data-theme="dark"] .btn--outline:hover:not(:disabled) {
+  background: rgba(207, 224, 242, 0.06);
 }

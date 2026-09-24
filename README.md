@@ -2,7 +2,7 @@
 
 **Versión:** 3.0.0 | **Estado:** Producción (GitHub Pages)  
 **Desarrollador:** Jean Barboza González  
-**URL:** https://jcbarbog.github.io/EBO/
+**URL:** [EBO-Biblioteca.Cliente](https://jcbarbog.github.io/EBO-Biblioteca.Cliente/)
 
 ---
 
@@ -295,8 +295,8 @@ J:\Escritorio\Aplicación de OCR/
 ### **Instalación Local**
 ```bash
 # Clonar repo
-git clone https://github.com/JCBarboG/App-OCR.git
-cd App-OCR
+git clone https://github.com/JCBarboG/EBO-Biblioteca.Cliente.git
+cd EBO-Biblioteca.Cliente
 
 # Instalar dependencias
 npm install
@@ -331,7 +331,7 @@ npm run build
 npm run deploy
 
 # Despliega automáticamente a:
-# https://jcbarbog.github.io/EBO/
+# https://jcbarbog.github.io/EBO-Biblioteca.Cliente/
 ```
 
 **Nota:** El `base` en `vite.config.js` es `/EBO/` (nombre exacto del repo).
@@ -497,7 +497,7 @@ Agregar idiomas requiere editar `src/i18n/translations.js`.
 - **Desarrollador:** Jean Barboza González
 - **Email:** jeanbarbozag05@gmail.com
 - **Formulario:** Usar "Soporte / Contacto" en la app
-- **Repositorio:** https://github.com/JCBarboG/App-OCR
+- **Repositorio:** [EBO-Biblioteca.Cliente](https://github.com/JCBarboG/EBO-Biblioteca.Cliente)
 
 ---
 

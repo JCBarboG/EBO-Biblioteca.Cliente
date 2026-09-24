@@ -18,6 +18,7 @@ import Drawer from './components/Drawer';
 import ConfigPanel from './components/ConfigPanel';
 import DocTypeSelector from './components/DocTypeSelector';
 import HelpButton from './components/HelpButton';
+import ConfirmDialog from './components/ConfirmDialog';
 
 import SupportView from './views/SupportView';
 import AboutView from './views/AboutView';
@@ -25,6 +26,12 @@ import PremiumView from './views/PremiumView';
 import TermsView from './views/TermsView';
 import PrivacyView from './views/PrivacyView';
 import GuideView from './views/GuideView';
+import HistoryView from './views/HistoryView';
+
+import {
+  HISTORY_LIMIT, HistoryQuotaError, createPackage, formatPackageDate, loadHistory,
+  oldestPackage, packageFileStamp, writeHistory,
+} from './utils/history';
 
 import './App.css';
 
@@ -58,7 +65,15 @@ export default function App() {
   const [records, setRecords] = useState([]);
   const [selection, setSelection] = useState({ start: 0, end: 0, text: '' });
   const [activeChip, setActiveChip] = useState(null);
+  // Overrides manuales de puntuación por columna ({ [fieldKey]: símbolo }).
+  // Sin entrada = se usa el preset del tipo de documento
+  // (config/punctuationPresets.js). Pertenecen al tipo de documento actual.
   const [columnPunctuation, setColumnPunctuation] = useState({});
+  // Ventana modal activa del historial: { kind: 'load' | 'limit' | 'quota', ... }
+  const [historyDialog, setHistoryDialog] = useState(null);
+  // Overrides a restaurar cuando un paquete del historial cambia el tipo de
+  // documento (el efecto de docType limpia los overrides; ver abajo).
+  const pendingOverridesRef = useRef(null);
 
   const chipTimerRef = useRef(null);
   const imagesRef = useRef([]);
@@ -76,8 +91,11 @@ export default function App() {
   useEffect(() => {
     setFields(emptyFieldsForType(docType));
     // Las columnas cambian de significado entre tipos de documento, así que
-    // la puntuación asignada manualmente no debe arrastrarse de un tipo a otro.
-    setColumnPunctuation({});
+    // la puntuación asignada manualmente no debe arrastrarse de un tipo a otro:
+    // al cambiar de tipo se carga el preset limpio del nuevo tipo. Excepción:
+    // al cargar un paquete del historial se restauran sus overrides.
+    setColumnPunctuation(pendingOverridesRef.current || {});
+    pendingOverridesRef.current = null;
   }, [docType]);
 
   const handleNewRecord = () => {
@@ -190,6 +208,67 @@ export default function App() {
     setColumnPunctuation((prev) => ({ ...prev, [key]: value }));
   };
 
+  const handlePunctuationReset = (key) => {
+    setColumnPunctuation((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
+  // ── Historial ──
+  const downloadPackage = (pkg) => {
+    exportBooksToExcel(pkg.rows, pkg.docType, lang, pkg.overrides || {}, packageFileStamp(pkg.createdAt));
+  };
+
+  const commitHistory = (pkg, list) => {
+    try {
+      writeHistory([pkg, ...list]);
+      setHistoryDialog(null);
+      showToast(t.step03.historySaved);
+    } catch (e) {
+      if (e instanceof HistoryQuotaError) setHistoryDialog({ kind: 'quota' });
+      else { setHistoryDialog(null); showToast(t.history.quotaTitle); }
+    }
+  };
+
+  const handleSaveHistory = () => {
+    if (records.length === 0) { showToast(t.step03.historyEmpty); return; }
+    const pkg = createPackage(records, docType, columnPunctuation);
+    const list = loadHistory();
+    if (list.length >= HISTORY_LIMIT) {
+      setHistoryDialog({ kind: 'limit', pkg, list, oldest: oldestPackage(list) });
+      return;
+    }
+    commitHistory(pkg, list);
+  };
+
+  const resolveLimit = (download) => {
+    const { pkg, list, oldest } = historyDialog;
+    if (download) downloadPackage(oldest);
+    // Si todavía sobra (p. ej. >50 por datos viejos), se recorta a 49 + el nuevo.
+    const kept = list.filter((p) => p.id !== oldest.id).slice(0, HISTORY_LIMIT - 1);
+    commitHistory(pkg, kept);
+  };
+
+  const applyPackage = (pkg) => {
+    setRecords(pkg.rows.map((r) => ({ ...r, id: r.id || crypto.randomUUID() })));
+    if (pkg.docType === docType) {
+      setColumnPunctuation({ ...(pkg.overrides || {}) });
+    } else {
+      pendingOverridesRef.current = { ...(pkg.overrides || {}) };
+      setDocType(pkg.docType);
+    }
+    setHistoryDialog(null);
+    setView('main');
+    showToast(t.history.loaded(pkg.rows.length));
+  };
+
+  const handleLoadPackage = (pkg) => {
+    if (records.length > 0) setHistoryDialog({ kind: 'load', pkg });
+    else applyPackage(pkg);
+  };
+
   const handleClearRecords = () => {
     if (!window.confirm(t.step03.clearConfirm)) return;
     setRecords([]);
@@ -218,6 +297,47 @@ export default function App() {
       />
       <ConfigPanel open={configOpen} onClose={() => setConfigOpen(false)} />
       <Toast message={toastMessage} />
+      <ConfirmDialog
+        open={historyDialog?.kind === 'load'}
+        title={t.history.loadTitle}
+        message={t.history.loadMessage}
+        onCancel={() => setHistoryDialog(null)}
+        actions={[
+          { label: t.history.cancel, variant: 'outline', onClick: () => setHistoryDialog(null) },
+          { label: t.history.load, variant: 'primary', onClick: () => applyPackage(historyDialog.pkg) },
+        ]}
+      />
+      <ConfirmDialog
+        open={historyDialog?.kind === 'limit'}
+        title={t.history.limitTitle}
+        message={t.history.limitMessage}
+        onCancel={() => setHistoryDialog(null)}
+        actions={[
+          { label: t.history.cancel, variant: 'ghost', onClick: () => setHistoryDialog(null) },
+          { label: t.history.limitContinue, variant: 'outline', onClick: () => resolveLimit(false) },
+          { label: t.history.limitDownload, variant: 'primary', onClick: () => resolveLimit(true) },
+        ]}
+      >
+        {historyDialog?.kind === 'limit' && historyDialog.oldest && (
+          <p className="dialog__package">
+            {t.history.packageSummary(
+              formatPackageDate(historyDialog.oldest.createdAt),
+              t.history.types[historyDialog.oldest.docType] || historyDialog.oldest.docType,
+              historyDialog.oldest.rowCount ?? historyDialog.oldest.rows.length,
+            )}
+          </p>
+        )}
+      </ConfirmDialog>
+      <ConfirmDialog
+        open={historyDialog?.kind === 'quota'}
+        title={t.history.quotaTitle}
+        message={t.history.quotaMessage}
+        onCancel={() => setHistoryDialog(null)}
+        actions={[
+          { label: t.history.close, variant: 'outline', onClick: () => setHistoryDialog(null) },
+          { label: t.history.openHistory, variant: 'primary', onClick: () => { setHistoryDialog(null); setView('history'); } },
+        ]}
+      />
       {view !== 'guide' && (
         <HelpButton
           visible={helpVisible}
@@ -235,6 +355,19 @@ export default function App() {
   if (view === 'premium') return shell(<>{header}<PremiumView onBack={() => setView('main')} /></>);
   if (view === 'terms') return shell(<>{header}<TermsView onBack={() => setView('about')} /></>);
   if (view === 'privacy') return shell(<>{header}<PrivacyView onBack={() => setView('about')} /></>);
+  if (view === 'history') {
+    return shell(
+      <>
+        {header}
+        <HistoryView
+          onBack={() => setView('main')}
+          onLoad={handleLoadPackage}
+          onDownload={(pkg) => { showToast(t.history.downloading); downloadPackage(pkg); }}
+          showToast={showToast}
+        />
+      </>,
+    );
+  }
   if (view === 'guide') return shell(<>{header}<GuideView onBack={() => setView('main')} /></>);
 
   return shell(
@@ -301,8 +434,10 @@ export default function App() {
             books={records}
             onSave={handleSave}
             onExport={handleExport}
+            onSaveHistory={handleSaveHistory}
             columnPunctuation={columnPunctuation}
             onPunctuationChange={handlePunctuationChange}
+            onPunctuationReset={handlePunctuationReset}
           />
         </section>
       </main>

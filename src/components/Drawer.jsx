@@ -39,6 +39,9 @@ export default function Drawer({ open, onClose, onNewRecord, onExport, onOpenCon
           <button type="button" className="drawer-item" onClick={() => handleItem(onExport)}>
             {t.menu.export}
           </button>
+          <button type="button" className="drawer-item" onClick={() => handleItem(() => onNavigate('history'))}>
+            {t.menu.history}
+          </button>
           <button type="button" className="drawer-item" onClick={() => handleItem(onOpenConfig)}>
             {t.menu.config}
           </button>
