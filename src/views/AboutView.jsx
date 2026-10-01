@@ -1,5 +1,6 @@
 import { useApp } from '../context/AppContext';
 import { useT } from '../i18n/translations';
+import Icon from '../components/Icons';
 
 export default function AboutView({ onBack, onNavigate }) {
   const { lang } = useApp();
@@ -9,7 +10,7 @@ export default function AboutView({ onBack, onNavigate }) {
   return (
     <div className="view">
       <div className="view-header">
-        <button type="button" className="view-back" onClick={onBack}>{ta.back}</button>
+        <button type="button" className="view-back" onClick={onBack} aria-label={t.ui.back}><Icon name="chevronLeft" size={16} strokeWidth={2} /></button>
         <h2>{ta.title}</h2>
       </div>
 

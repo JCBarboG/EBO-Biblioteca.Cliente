@@ -16,8 +16,13 @@ const SHEET_NAMES = {
 // vista previa del paso 03, así que ambas siempre coinciden.
 // `fileSuffix` (opcional) se agrega al nombre del archivo, p. ej. la fecha
 // de un paquete del historial.
-export function exportBooksToExcel(books, docType = 'libro', lang = 'es', overrides = {}, fileSuffix = '') {
-  const cats = CATEGORIES_BY_TYPE[docType] || CATEGORIES_BY_TYPE.libro;
+// `columns` (opcional) es la lista final de columnas en el orden visible
+// (utils/columns.js → getColumns), incluidas las propias. Sin ella se usan
+// las columnas MARC del tipo, como siempre.
+export function exportBooksToExcel(books, docType = 'libro', lang = 'es', overrides = {}, fileSuffix = '', columns = null) {
+  const cats = Array.isArray(columns) && columns.length
+    ? columns
+    : CATEGORIES_BY_TYPE[docType] || CATEGORIES_BY_TYPE.libro;
   const headers = cats.map((c) => {
     const label = c.colLabel[lang] || c.colLabel.es;
     return c.marcTag ? `${label} (${c.marcTag})` : label;

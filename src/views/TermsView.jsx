@@ -1,5 +1,6 @@
 import { useApp } from '../context/AppContext';
 import { useT } from '../i18n/translations';
+import Icon from '../components/Icons';
 
 const CONTENT = {
   es: (
@@ -57,7 +58,7 @@ export default function TermsView({ onBack }) {
   return (
     <div className="view">
       <div className="view-header">
-        <button type="button" className="view-back" onClick={onBack}>{t.terms.back}</button>
+        <button type="button" className="view-back" onClick={onBack} aria-label={t.ui.back}><Icon name="chevronLeft" size={16} strokeWidth={2} /></button>
         <h2>{t.terms.title}</h2>
       </div>
       <div className="view-body legal-body">

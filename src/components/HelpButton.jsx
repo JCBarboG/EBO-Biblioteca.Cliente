@@ -1,5 +1,6 @@
 import { useApp } from '../context/AppContext';
 import { useT } from '../i18n/translations';
+import Icon from './Icons';
 
 // Ícono flotante de ayuda: siempre visible en la esquina inferior derecha
 // mientras dure la sesión. Si el usuario lo cierra con la "x", desaparece
@@ -29,7 +30,7 @@ export default function HelpButton({ visible, onOpen, onDismiss }) {
         onClick={(e) => { e.stopPropagation(); onDismiss(); }}
         aria-label={t.help.dismiss}
       >
-        ✕
+        <Icon name="close" size={12} strokeWidth={2.2} />
       </button>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useApp } from '../context/AppContext';
 import { useT } from '../i18n/translations';
+import Icon from '../components/Icons';
 
 export default function GuideView({ onBack }) {
   const { lang } = useApp();
@@ -9,11 +10,11 @@ export default function GuideView({ onBack }) {
   return (
     <div className="view">
       <div className="view-header">
-        <button type="button" className="view-back" onClick={onBack}>{tg.back}</button>
+        <button type="button" className="view-back" onClick={onBack} aria-label={t.ui.back}><Icon name="chevronLeft" size={16} strokeWidth={2} /></button>
         <h2>{tg.title}</h2>
       </div>
 
-      <div className="view-body">
+      <div className="view-body guide-body">
         <p className="guide-intro">{tg.intro}</p>
 
         {/* Paso 01 — elegir tipo de documento */}
@@ -93,6 +94,18 @@ export default function GuideView({ onBack }) {
               </table>
             </div>
             <p className="guide-caption">{tg.step3.caption}</p>
+          </div>
+        </section>
+
+        {/* Paso 04 — campos y columnas propias (nuevo) */}
+        <section className="guide-step guide-step--new">
+          <div className="guide-step__head">
+            <span className="guide-step__num">04</span>
+            <h3>{tg.step4.title}</h3>
+          </div>
+          <p className="guide-step__desc">{tg.step4.desc}</p>
+          <div className="guide-visual">
+            <div className="guide-demo-line">{tg.step4.demo}</div>
           </div>
         </section>
       </div>

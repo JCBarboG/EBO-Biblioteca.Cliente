@@ -70,7 +70,9 @@ export function writeHistory(list) {
   }
 }
 
-export function createPackage(rows, docType, overrides) {
+// `columns` (opcional): { customColumns, columnOrder } del tipo de documento
+// del paquete. Los paquetes viejos no los tienen y siguen cargando igual.
+export function createPackage(rows, docType, overrides, columns = {}) {
   return {
     id: crypto.randomUUID(),
     createdAt: toLocalISO(),
@@ -78,6 +80,8 @@ export function createPackage(rows, docType, overrides) {
     rowCount: rows.length,
     rows: rows.map((r) => ({ ...r })),
     overrides: { ...overrides },
+    customColumns: (columns.customColumns || []).map((c) => ({ ...c })),
+    columnOrder: Array.isArray(columns.columnOrder) ? [...columns.columnOrder] : null,
   };
 }
 

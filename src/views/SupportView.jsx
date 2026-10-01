@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import emailjs from '@emailjs/browser';
 import { useApp } from '../context/AppContext';
 import { useT } from '../i18n/translations';
+import Icon from '../components/Icons';
 
 // Configure your EmailJS credentials here
 const EMAILJS_SERVICE_ID = 'service_dhokhvc';
@@ -19,7 +20,7 @@ function fileToBase64(file) {
   });
 }
 
-export default function SupportView({ onBack }) {
+export default function SupportView({ onBack, onNavigate }) {
   const { lang } = useApp();
   const t = useT(lang);
   const ts = t.support;
@@ -78,14 +79,24 @@ export default function SupportView({ onBack }) {
   return (
     <div className="view">
       <div className="view-header">
-        <button type="button" className="view-back" onClick={onBack}>{ts.back}</button>
+        <button type="button" className="view-back" onClick={onBack} aria-label={t.ui.back}><Icon name="chevronLeft" size={16} strokeWidth={2} /></button>
         <h2>{ts.title}</h2>
       </div>
 
-      <div className="view-body">
+      <div className="view-body support-layout">
+        <div className="support-intro">
+          <p className="support-intro__title">{t.ui.supportIntroTitle}</p>
+          <p className="support-intro__text">{t.ui.supportIntroText}</p>
+          {onNavigate && (
+            <button type="button" className="support-intro__link" onClick={() => onNavigate('guide')}>
+              <Icon name="guide" size={20} strokeWidth={1.6} />
+              <span>{t.menu.guide}</span>
+            </button>
+          )}
+        </div>
         {status === 'success' ? (
           <div className="support-success">
-            <span className="support-success__icon">✓</span>
+            <span className="support-success__icon"><Icon name="check" size={26} strokeWidth={2} /></span>
             <p>{ts.success}</p>
           </div>
         ) : (
@@ -135,6 +146,7 @@ export default function SupportView({ onBack }) {
                 tabIndex={0}
                 onKeyDown={(e) => e.key === 'Enter' && attachRef.current?.click()}
               >
+                <Icon name="image" size={22} strokeWidth={1.5} className="attach-icon" />
                 <span className="attach-hint">{ts.attachHint}</span>
                 <span className="attach-limit">{ts.imageLimit}</span>
               </div>
@@ -157,7 +169,7 @@ export default function SupportView({ onBack }) {
                         onClick={() => removeAttach(i)}
                         aria-label="Eliminar imagen"
                       >
-                        ✕
+                        <Icon name="close" size={12} strokeWidth={2.2} />
                       </button>
                     </div>
                   ))}

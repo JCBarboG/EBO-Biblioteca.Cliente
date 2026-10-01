@@ -106,12 +106,19 @@ function valueByTag(row, docType, tag) {
   return cat ? String(row[cat.key] || '').trim() : '';
 }
 
-/** Regla del preset para una columna (string, objeto condicional o undefined). */
+/**
+ * Regla del preset para una columna (string, objeto condicional o undefined).
+ * Las columnas propias (field.custom) no tienen preset: siempre "sin
+ * puntuación", aunque su etiqueta MARC coincida con una del preset. Solo se
+ * puntúan con el override manual de la columna.
+ */
 export function presetRuleFor(field, docType) {
+  if (!field || field.custom) return undefined;
   return presetFor(docType).terminal[field.marcTag];
 }
 
 export function separatorFor(field, docType) {
+  if (!field || field.custom) return undefined;
   return presetFor(docType).separators[field.marcTag];
 }
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { useT } from '../i18n/translations';
+import Icon from '../components/Icons';
 
 export default function PremiumView({ onBack }) {
   const { lang } = useApp();
@@ -30,7 +31,7 @@ export default function PremiumView({ onBack }) {
   return (
     <div className="view">
       <div className="view-header">
-        <button type="button" className="view-back" onClick={onBack}>{tp.back}</button>
+        <button type="button" className="view-back" onClick={onBack} aria-label={t.ui.back}><Icon name="chevronLeft" size={16} strokeWidth={2} /></button>
         <h2>{tp.title}</h2>
       </div>
 
@@ -41,7 +42,7 @@ export default function PremiumView({ onBack }) {
           <h2 className="premium-hero__title">{tp.hero}</h2>
           <p className="premium-hero__desc">{tp.heroDesc}</p>
           <div className="premium-dev-notice">
-            <strong>⚠️</strong> {tp.devNotice}
+            <Icon name="alert" size={16} strokeWidth={1.8} className="premium-dev-notice__icon" /> <span>{tp.devNotice}</span>
           </div>
         </div>
 
@@ -57,7 +58,7 @@ export default function PremiumView({ onBack }) {
             onClick={() => goTo((slide - 1 + total) % total)}
             aria-label="Anterior"
           >
-            ←
+            <Icon name="chevronLeft" size={16} strokeWidth={2} />
           </button>
 
           <div className="carousel-track">
@@ -66,7 +67,6 @@ export default function PremiumView({ onBack }) {
                 key={i}
                 className={`carousel-slide${i === slide ? ' carousel-slide--active' : ''}`}
               >
-                <span className="carousel-slide__icon">{s.icon}</span>
                 <span className="carousel-slide__label">{s.label}</span>
                 <h3 className="carousel-slide__title">{s.title}</h3>
                 <p className="carousel-slide__desc">{s.desc}</p>
@@ -80,7 +80,7 @@ export default function PremiumView({ onBack }) {
             onClick={() => goTo((slide + 1) % total)}
             aria-label="Siguiente"
           >
-            →
+            <Icon name="chevronRight" size={16} strokeWidth={2} />
           </button>
 
           <div className="carousel-dots">
@@ -100,7 +100,6 @@ export default function PremiumView({ onBack }) {
         <div className="premium-features">
           {tp.features.map((f, i) => (
             <div key={i} className="premium-feature">
-              <span className="premium-feature__icon">{f.icon}</span>
               <span className="premium-feature__label">{f.label}</span>
             </div>
           ))}
