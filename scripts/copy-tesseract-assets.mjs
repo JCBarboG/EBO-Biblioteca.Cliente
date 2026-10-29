@@ -5,7 +5,7 @@
 // típico de Tesseract.js en producción: el worker o el WASM no cargan porque
 // las rutas se resolvieron contra un CDN externo o un build path incorrecto.
 
-import { existsSync, mkdirSync, copyFileSync } from 'node:fs';
+import { existsSync, mkdirSync, copyFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -54,54 +54,49 @@ for (const file of coreFiles) {
   copyIfExists(path.join(coreDir, file), publicTesseractDir);
 }
 
-// Datos de idioma (español + inglés, modelo LSTM "best"). Se descargan una
-// sola vez desde el CDN oficial de tesseract.js-data y quedan en /public para
-// que la app no dependa de un CDN externo en producción.
-const LANGS = ['spa', 'eng'];
+// Datos de idioma (español + inglés, modelo LSTM "best_int") y de OSD
+// (Orientation and Script Detection, paquete independiente del idioma que
+// solo detecta el ángulo del texto). Vienen de los paquetes npm
+// @tesseract.js-data/* (devDependencies), así que se instalan con el resto
+// de dependencias, sin depender de una descarga aparte. Si el paquete no
+// estuviera, se intenta bajar el archivo desde el CDN oficial.
+//
+// Antes solo se descargaban del CDN y, si la descarga fallaba, el script
+// apenas mostraba un aviso: el sitio se publicaba sin los datos de idioma y
+// la extracción de texto fallaba siempre. Ahora la instalación falla con un
+// error claro si faltan los datos de español o inglés.
+const DATA = [
+  { file: 'spa.traineddata.gz', pkg: 'spa', variant: '4.0.0_best_int', required: true },
+  { file: 'eng.traineddata.gz', pkg: 'eng', variant: '4.0.0_best_int', required: true },
+  { file: 'osd.traineddata.gz', pkg: 'osd', variant: '4.0.0', required: false },
+];
 
-async function downloadLang(lang) {
-  const dest = path.join(publicTessdataDir, `${lang}.traineddata.gz`);
+async function provide({ file, pkg, variant }) {
+  const dest = path.join(publicTessdataDir, file);
+  const fromPackage = path.join(root, 'node_modules', '@tesseract.js-data', pkg, variant, file);
+  if (copyIfExists(fromPackage, publicTessdataDir)) return true;
   if (existsSync(dest)) {
-    console.log(`[copy-tesseract-assets] ${lang}.traineddata.gz ya existe, se omite descarga.`);
-    return;
+    console.log(`[copy-tesseract-assets] ${file} ya existe, se omite descarga.`);
+    return true;
   }
-  const url = `https://cdn.jsdelivr.net/npm/@tesseract.js-data/${lang}/4.0.0_best_int/${lang}.traineddata.gz`;
+  const url = `https://cdn.jsdelivr.net/npm/@tesseract.js-data/${pkg}/${variant}/${file}`;
   try {
-    console.log(`[copy-tesseract-assets] Descargando ${lang}.traineddata.gz...`);
+    console.log(`[copy-tesseract-assets] Descargando ${file}...`);
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const buf = Buffer.from(await res.arrayBuffer());
-    const { writeFileSync } = await import('node:fs');
     writeFileSync(dest, buf);
-    console.log(`[copy-tesseract-assets] Listo: ${lang}.traineddata.gz (${(buf.length / 1024 / 1024).toFixed(2)} MB)`);
+    console.log(`[copy-tesseract-assets] Listo: ${file} (${(buf.length / 1024 / 1024).toFixed(2)} MB)`);
+    return true;
   } catch (err) {
-    console.warn(`[copy-tesseract-assets] No se pudo descargar ${lang}.traineddata.gz (${err.message}). La app intentará cargarlo desde el CDN en tiempo de ejecución.`);
+    console.warn(`[copy-tesseract-assets] No se pudo descargar ${file} (${err.message}).`);
+    return false;
   }
 }
 
-await Promise.all(LANGS.map(downloadLang));
-
-// Datos de OSD (Orientation and Script Detection). Es un paquete especial,
-// independiente del idioma, usado solo para detectar el ángulo del texto
-// (rápido, no es el OCR completo) antes de habilitar la extracción.
-async function downloadOsd() {
-  const dest = path.join(publicTessdataDir, 'osd.traineddata.gz');
-  if (existsSync(dest)) {
-    console.log('[copy-tesseract-assets] osd.traineddata.gz ya existe, se omite descarga.');
-    return;
-  }
-  const url = 'https://cdn.jsdelivr.net/npm/@tesseract.js-data/osd/4.0.0/osd.traineddata.gz';
-  try {
-    console.log('[copy-tesseract-assets] Descargando osd.traineddata.gz...');
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const buf = Buffer.from(await res.arrayBuffer());
-    const { writeFileSync } = await import('node:fs');
-    writeFileSync(dest, buf);
-    console.log(`[copy-tesseract-assets] Listo: osd.traineddata.gz (${(buf.length / 1024 / 1024).toFixed(2)} MB)`);
-  } catch (err) {
-    console.warn(`[copy-tesseract-assets] No se pudo descargar osd.traineddata.gz (${err.message}). La detección de orientación quedará deshabilitada hasta que se descargue.`);
-  }
+const results = await Promise.all(DATA.map(provide));
+const missing = DATA.filter((d, i) => d.required && !results[i]).map((d) => d.file);
+if (missing.length) {
+  console.error(`[copy-tesseract-assets] ERROR: faltan ${missing.join(', ')}. Sin estos archivos el OCR no funciona; ejecuta "npm install" con conexión a internet.`);
+  process.exit(1);
 }
-
-await downloadOsd();
