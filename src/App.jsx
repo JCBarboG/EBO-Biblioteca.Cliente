@@ -192,8 +192,7 @@ export default function App() {
     }
     setOrientationWarn('');
     try {
-      const texts = [];
-      for (const img of images) texts.push(await recognize(img.file));
+      const texts = await recognize(images.map((img) => img.file));
       setOcrText(texts.join('\n\n---\n\n'));
     } catch { /* error shown via ocrError */ }
   };
